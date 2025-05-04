@@ -1,0 +1,4 @@
+Nous avons changé l'attribut organisation_id de la classe Utilisateur de Not Null à null. donc, il peut etre null, qui sera utile lors de l'inscription
+car quand on crée un compte il sera par défaut candidat et puis on peut update son role et par conséquent l'attribut organisation_id.
+
+Nous avons rajouté aussi un attribut nombre_candidatures et date_publication dans la classe offre_emploi.
