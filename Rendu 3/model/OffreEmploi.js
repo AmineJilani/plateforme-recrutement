@@ -3,7 +3,7 @@ const db = require('./db.js');
 module.exports = {
     // Lire une offre d'emploi par ID
     read: function (id, callback) {
-      db.query("SELECT * FROM offre_emploi WHERE Id_offre = ?", [id], function (err, results) {
+      db.query("SELECT * FROM Offre_emploi WHERE Id_offre = ?", [id], function (err, results) {
           if (err) {
               return callback(err, null); // Gestion d'erreur flexible
           }
@@ -19,7 +19,7 @@ module.exports = {
             o.date_validite, 
             o.indication, 
             o.nbr_piece, 
-            o.nombre_candidatures AS nombre_candidatures,
+            o.nombre_candidature AS nombre_candidatures,
             o.date_publication as date_publication,
             f.Id_poste AS Id_poste,  
             f.intitule AS fiche_intitule
@@ -36,9 +36,9 @@ module.exports = {
 },
 
     // Créer une nouvelle offre d'emploi
-    create: function (Id_offre, Etat, date_validite, indication, nbr_piece, fiche_id, callback) {
-        const sql = "INSERT INTO offre_emploi (Id_offre, Etat, date_validite, indication, nbr_piece, fiche_id) VALUES (?, ?, ?, ?, ?, ?)";
-        db.query(sql, [Id_offre, Etat, date_validite, indication, nbr_piece, fiche_id], function (err, result) {
+    create: function (Id_offre, Etat, date_validite, indication, nbr_piece, nombre_candidature,date_publication, fiche_id, callback) {
+        const sql = "INSERT INTO Offre_emploi (Id_offre, Etat, date_validite, indication, nbr_piece, nombre_candidature, date_publication, fiche_id) VALUES (?, ?, ?, ?, ?, 0, NOW(), ?)";
+        db.query(sql, [Id_offre, Etat, date_validite, indication, nbr_piece, nombre_candidature,date_publication, fiche_id], function (err, result) {
           if (err) return callback(err, null);
           callback(null, result);
         });
