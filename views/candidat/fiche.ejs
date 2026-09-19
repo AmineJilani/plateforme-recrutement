@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de la Fiche</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            color: #7d3cff;
+        }
+        .info-item {
+            margin-bottom: 10px;
+        }
+        .info-item i {
+            margin-right: 8px;
+            color: #7d3cff;
+        }
+        .offer-header {
+            background-color: #7d3cff;
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+        }
+        .offer-header h3 {
+            margin: 0;
+        }
+        .offer-header .offer-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- En-tête avec l'intitulé de l'offre -->
+        <div class="offer-header">
+            <!-- Affichage de l'intitulé de la fiche dans l'en-tête -->
+            <h3 class="offer-title"><%= fiche.fiche_intitule %></h3>
+
+            <p class="mb-0">Détails de l'offre de travail</p>
+        </div>
+
+        <!-- Détails de la fiche de poste -->
+        <div class="card p-4">
+            <h2 class="card-title mb-4"><%= fiche.fiche_intitule %></h2>
+            
+            <div class="info-item"><i class="bi bi-clipboard2-check"></i><strong>Statut :</strong> <%= fiche.statut_poste %></div>
+            <div class="info-item"><i class="bi bi-briefcase"></i><strong>Type de métier :</strong> <%= fiche.type_metier %></div>
+            <div class="info-item"><i class="bi bi-geo-alt"></i><strong>Lieu :</strong> <%= fiche.lieu %></div>
+            <div class="info-item"><i class="bi bi-clock"></i><strong>Rythme :</strong> <%= fiche.rythme %></div>
+            <div class="info-item"><i class="bi bi-cash-coin"></i><strong>Salaire :</strong> <%= fiche.salaire %></div>
+            <div class="info-item"><i class="bi bi-text-left"></i><strong>Description :</strong><br> <%= fiche.description %></div>
+            <div class="info-item"><i class="bi bi-person-bounding-box"></i><strong>Responsable hiérarchique :</strong> <%= fiche.responsable_hier %></div>
+            <div class="info-item"><i class="bi bi-building"></i><strong>Organisation :</strong> <%= fiche.organisation_nom %></div>
+
+            <div class="mt-4">
+                <button class="btn btn-secondary" onclick="window.history.back();">← Retour</button>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

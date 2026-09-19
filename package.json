@@ -1,0 +1,27 @@
+{
+  "name": "recrutement-app",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "jest",
+    "migrate:rehash-passwords": "node scripts/rehash-passwords.js",
+    "seed:demo": "node scripts/seed-demo-data.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.9",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "http-errors": "^2.0.0",
+    "morgan": "^1.10.0",
+    "multer": "^2.4.0",
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
+  }
+}

@@ -1,130 +1,177 @@
-FICHIER README
+# Plateforme de recrutement
 
+Application web de recrutement avec trois rôles utilisateurs — **candidat**, **recruteur** et **administrateur** — permettant la publication d'offres d'emploi, le dépôt de candidatures avec pièces jointes, et le suivi des candidatures par les recruteurs.
 
-Organisation du dépôt Git : 
+## Contexte
 
-mon-projet/
-├── model/                          # Modèles de données (schemas Mongoose ou équivalents)
-│   ├── Candidature.js
-│   ├── db.js
-│   ├── DemandeOrganisations.js
-│   ├── DemandeRecruteurs.js
-│   ├── Dossier.js
-│   ├── FicheDePoste.js
-│   ├── OffreEmploi.js
-│   ├── Organisation.js
-│   └── Utilisateur.js
+Projet académique réalisé dans le cadre du module **SR10** à l'UTC (Université de Technologie de Compiègne).
+
+## Stack technique
+
+Backend Node.js / Express avec rendu de vues EJS côté serveur, et base de données MySQL locale.
+
+| Dépendance | Version | Rôle |
+|---|---|---|
+| express | ^4.19.2 | Framework web |
+| ejs | ^3.1.9 | Moteur de templates (rendu serveur) |
+| mysql | ^2.18.1 | Driver MySQL |
+| express-session | ^1.18.0 | Gestion de session |
+| bcrypt | ^6.0.0 | Hachage des mots de passe |
+| multer | ^2.4.0 | Upload de fichiers (CV, lettre de motivation) |
+| cookie-parser | ^1.4.6 | Parsing des cookies |
+| dotenv | ^16.4.5 | Chargement des variables d'environnement |
+| http-errors | ^2.0.0 | Gestion des erreurs HTTP |
+| morgan | ^1.10.0 | Logging des requêtes HTTP |
+
+Dépendances de développement : `jest` ^29.7.0, `supertest` ^6.3.4.
+
+## Architecture
+
+```
+├── src/
+│   ├── app.js                    # Point d'entrée Express, montage des routeurs, session, middlewares
+│   ├── config/
+│   │   └── db.js                 # Pool de connexion MySQL (variables d'environnement)
+│   ├── models/
+│   │   ├── Utilisateur.js
+│   │   ├── Organisation.js
+│   │   ├── FicheDePoste.js
+│   │   ├── OffreEmploi.js
+│   │   ├── Candidature.js
+│   │   └── Dossier.js
+│   └── routes/
+│       ├── login.js              # Connexion + déconnexion
+│       ├── register.js           # Inscription (candidat)
+│       ├── candidat.js           # Dashboard, fiche de poste, candidature + upload
+│       ├── recruteur.js          # Dashboard, gestion des candidatures
+│       └── administrateur.js     # Dashboard (lecture seule)
 │
-├── public/                         # Fichiers statiques accessibles par le client
-│   ├── images/                     # Logos et images utilisées dans l'interface
-│   │   ├── check-logo.png
-│   │   ├── icone.png
-│   │   ├── logo-LV.png
-│   │   ├── logo-Phoenix.png
-│   │   ├── logo-refus.jpg
-│   │   └── logo-Safran.jpg
-│   ├── javascripts/               # Scripts JavaScript côté client
-│   │   ├── filtreCandidat.js
-│   │   ├── filtresAdmin.js
-│   │   └── filtresRecruteur.js
-│   └── stylesheets/              # Feuilles de style CSS
-│       └── style.css
-│
-├── routes/                         # Définition des routes de l'application
-│   ├── administrateur.js
-│   ├── candidat.js
-│   ├── login.js
-│   ├── recruteur.js
-│   └── register.js
-│
-├── test/                           # Tests unitaires/fonctionnels
-│   ├── login.test.js
-│   ├── recruteur.test.js
-│   ├── route.test.js
-│   ├── session.test.js
-│   └── test_security_login.test.js
-│
-├── upload/                         # Dossiers pour fichiers uploadés
-│   └── ensembles_de_CV.pdf
-│
-├── views/                          # Templates EJS pour le rendu côté serveur
-│   ├── admin/
-│   │   ├── dashboard.ejs
-│   │   └── demande-recruteur.ejs
-│   ├── candidat/
-│   │   ├── ajouter-organisation.ejs
-│   │   ├── candidater.ejs
-│   │   ├── dashboard.ejs
-│   │   ├── devenir-recruteur.ejs
-│   │   ├── fiche.ejs
-│   │   ├── mescandidatures.ejs
-│   │   ├── mesdemandes.ejs
-│   │   └── modifier-candidature.ejs
-│   ├── recruteur/
-│   │   ├── ajoute-fiche.ejs
-│   │   ├── ajouter-offre.ejs
-│   │   ├── candidature-details.ejs
-│   │   ├── dashboard.ejs
-│   │   ├── devenir-admin.ejs
-│   │   ├── gestion-candidatures.ejs
-│   │   └── voir-fiche.ejs
-│   ├── error.ejs
+├── views/                        # Templates EJS, organisés par rôle
 │   ├── login.ejs
-│   └── register.ejs
+│   ├── register.ejs
+│   ├── error.ejs
+│   ├── candidat/
+│   ├── recruteur/
+│   └── admin/
 │
-├── app.js                          # Configuration de l'application Express
-├── insert.ejs                      # Template spécifique pour l’insertion de données
-├── package-lock.json               # Fichier de verrouillage des dépendances
-├── package.json                    # Dépendances et scripts du projet
-├── server.js                       # Lancement du serveur
-└── test-db.js                      # Script de test pour la base de données
+├── public/
+│   └── images/                   # Assets statiques
+│
+├── db/
+│   ├── schema.sql                # Schéma MySQL (tables, contraintes, FK)
+│   └── NOTES.md                  # Choix de modélisation et points connus
+│
+├── scripts/
+│   ├── seed-demo-data.js         # Jeu de données de démonstration (un compte par rôle)
+│   └── rehash-passwords.js       # Migration one-shot : re-hash bcrypt des mots de passe en clair
+│
+├── docs/
+│   └── uml.md                    # Diagrammes UML (classes + cas d'utilisation)
+│
+├── test/                         # Tests Jest / Supertest
+│
+├── uploads/                      # Fichiers déposés par les candidats (non versionné)
+├── .env.example
+└── package.json
+```
 
+Communication entre les couches : les routes Express appellent directement les fonctions exposées par les modèles (requêtes SQL paramétrées via le driver `mysql`), puis transmettent les résultats à `res.render()` pour un rendu EJS côté serveur. Aucune API JSON, aucun frontend séparé.
 
-model/ : contient les définitions des modèles de données utilisés par l’application.
+## Fonctionnalités par rôle
 
-public/ : tout ce qui est visible statiquement par le navigateur (images, CSS, JS).
+### Candidat
+- Inscription (mot de passe haché avec **bcrypt**, 10 rounds) et connexion.
+- Dashboard listant les offres d'emploi publiées.
+- Consultation du détail d'une fiche de poste.
+- Candidature à une offre avec upload de **CV** et **lettre de motivation** (PDF ou DOCX, 5 Mo max par fichier).
 
-routes/ : chaque fichier représente un groupe de routes qui vont servir les différents rôles de notre application.
+### Recruteur
+- Connexion (compte créé par un administrateur, aucune inscription publique dédiée — voir Limites connues).
+- Dashboard listant les offres d'emploi.
+- Publication d'une offre : formulaire combiné créant la fiche de poste (rattachée à l'organisation du recruteur) et l'offre d'emploi associée en une seule soumission.
+- Consultation des candidatures reçues pour une offre.
+- Consultation de la fiche de contact d'un candidat ayant postulé.
 
-views/ : organisation claire selon le type d’utilisateur (admin, candidat, recruteur).
+### Administrateur
+- Connexion.
+- Dashboard listant les utilisateurs et les organisations.
+- Gestion des utilisateurs : création (avec mot de passe haché bcrypt), modification (nom, coordonnées, **rôle**, organisation de rattachement), suppression. C'est le seul moyen actuel de créer un compte recruteur ou administrateur, ou de faire évoluer le rôle d'un candidat.
+- Gestion des organisations : création, modification, suppression.
 
-app.js et server.js : fichiers principaux de configuration et de lancement du serveur.
+### Transverse
+- Déconnexion (bouton présent sur chaque tableau de bord).
+- Sessions gérées via `express-session`, secret chargé depuis `SESSION_SECRET` (variable d'environnement).
 
-test/ : tests structurés par fonctionnalité.
+## Documentation
 
-upload/ : dossier pour les fichiers transmis par les utilisateurs.
+- [Diagrammes UML (classes + cas d'utilisation)](docs/uml.md)
 
+## Installation et lancement
 
+### Prérequis
+- Node.js
+- Une instance MySQL locale
 
+### Étapes
 
-Commits : 
+1. Installer les dépendances :
+   ```
+   npm install
+   ```
 
-Avant d'utiliser Gitlab, la plupart du code a été réalisé de notre côté, puis tout est restructuré et lancé sur la machine
-d'Amine. Nous avons commencé à utiliser GitLab un peu tard, lors de la finalisation du TD3
+2. Importer le schéma dans MySQL :
+   ```
+   mysql -u root -p < db/schema.sql
+   ```
 
-Voici les commit les plus notables : 
+3. Créer un utilisateur MySQL dédié à l'application (recommandé plutôt que d'utiliser `root`) :
+   ```sql
+   CREATE USER 'recrutement_app'@'localhost' IDENTIFIED BY 'un_mot_de_passe_solide';
+   GRANT ALL PRIVILEGES ON DB_recrut.* TO 'recrutement_app'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
 
-- entre "premier commit - b27a75d56ea3462041d24852568c6c395a95b87a" et "je fais quelques tests - faa18a6afb54be21d29ce8d142c9ef4ad492cf0a" : réalisation de multiples tests pour prendre en main git
+4. Copier `.env.example` vers `.env` et renseigner les variables (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `SESSION_SECRET` — générer ce dernier avec `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`).
 
-- entre "TD5 début - dc901f6b0837fd57026f1ea91fda696981fdf760" et "legeres modifications - 91227039242607cdffff5a58ce0f9c615effffd6" : test d'implémentation de l'api dans notre projet pour la réalisation du TD5, puis suppression oar causes de conflits. De plus,
-des modifications ont été apportées pour que l'application fonctionne sans problèmes.
+5. Lancer le serveur :
+   ```
+   npm start
+   ```
+   L'application est accessible sur `http://localhost:3000`.
 
-- "commit - 98eb0e3a718376fb3239e1994ff6cccd2032217c" : implémentation du TD4 d'une seule traite + 3éme test de cybersécurité
+### Données de démonstration
 
-- entre "maj multer - 4a5895f8e111af112370441b87e9ea5f817be855" et "deuxième test implémenté - 575cc1a4c38abfeba642e415b4f8fb5f77fbc5a3" : implémentation des 2 derniers tests de cybersécurité
+Pour peupler la base avec un compte par rôle (candidat, recruteur, administrateur) et une offre d'emploi publiée :
+```
+npm run seed:demo
+```
 
+### Migration des mots de passe existants
 
-Principes et bonnes pratiques suivies : 
+Si la base contient des comptes créés avant l'introduction du hachage bcrypt (mots de passe stockés en clair), un script one-shot les re-hache automatiquement (idempotent — les mots de passe déjà hachés sont ignorés) :
+```
+npm run migrate:rehash-passwords
+```
 
-- Séparation des responsabilités : routes/, model/, views/, public/ ; application du pattern Modèle-Vue-Contrôleur
-pour avoir une vue claire du projet
+### Base existante créée avant l'auto-incrémentation des offres
 
-- Dossier public/ : isolation des fichiers statiques
+Si votre base a été importée avant l'introduction de la création d'offre côté recruteur, `Id_poste` (table `fiche_de_poste`) et `Id_offre` (table `offre_emploi`) doivent être passés en `AUTO_INCREMENT` (les contraintes de clé étrangère doivent être retirées puis recréées le temps de la modification) :
+```sql
+ALTER TABLE offre_emploi DROP FOREIGN KEY fk_offre_fiche;
+ALTER TABLE candidature DROP FOREIGN KEY fk_candidature_offre;
 
-- Organisation des vues par rôle utilisateur : templates .ejs réparties en sous-dossiers pour améliorer la visibilité
+ALTER TABLE fiche_de_poste MODIFY COLUMN Id_poste INT AUTO_INCREMENT;
+ALTER TABLE offre_emploi MODIFY COLUMN Id_offre INT AUTO_INCREMENT;
 
-- Présence de tests : tests automatisés qui permettent de tester la sécurité de notre site
+ALTER TABLE offre_emploi ADD CONSTRAINT fk_offre_fiche FOREIGN KEY (fiche_id) REFERENCES fiche_de_poste(Id_poste);
+ALTER TABLE candidature ADD CONSTRAINT fk_candidature_offre FOREIGN KEY (offre_id) REFERENCES Offre_emploi(Id_offre);
+```
+(Une base importée directement depuis `db/schema.sql` dans sa version actuelle n'a pas besoin de cette étape.)
 
-- Utilisation de middlewares sûrs et fiables
+## Limites connues
 
-- Structures de nos requêtes résistante aux différentes attaques extérieures
+- **Inscription recruteur/administrateur** : aucun parcours d'inscription public ne permet de créer directement un compte recruteur ou administrateur — seul un administrateur peut le faire (création directe en tant que tel, ou promotion d'un candidat existant via la modification de son rôle).
+- **Organisation d'un recruteur** : la création d'offre nécessite que le recruteur soit rattaché à une organisation (`organisation_id`) ; un recruteur sans organisation ne peut pas publier d'offre tant qu'un administrateur ne le rattache pas à une organisation existante.
+- **Upload de pièces jointes** : limité aux formats PDF et DOCX, 5 Mo maximum par fichier ; le CV et la lettre de motivation restent facultatifs à la soumission d'une candidature.
+- **Suppression avec dépendances** : la suppression d'une organisation ou d'un utilisateur encore référencés par une fiche de poste ou une candidature échoue (contrainte de clé étrangère, sans cascade définie) — un message d'erreur générique est renvoyé plutôt qu'une suppression en cascade.
+- **Tests (`test/`)** : non alignés avec l'état actuel du code. Certains supposent des données précises absentes de tout jeu de seed fourni (comptes, offres et candidatures spécifiques) ; d'autres contiennent des assertions obsolètes (ex. code HTTP ou route attendus qui ne correspondent plus au comportement réel de l'application). À revoir avant de s'appuyer dessus en CI.
