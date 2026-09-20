@@ -21,8 +21,11 @@ module.exports = {
             o.nbr_piece, 
             o.nombre_candidature AS nombre_candidatures,
             o.date_publication as date_publication,
-            f.Id_poste AS Id_poste,  
-            f.intitule AS fiche_intitule
+            f.Id_poste AS Id_poste,
+            f.intitule AS fiche_intitule,
+            f.lieu AS lieu,
+            f.type_metier AS type_metier,
+            f.rythme AS rythme
         FROM 
             Offre_emploi o
         JOIN 

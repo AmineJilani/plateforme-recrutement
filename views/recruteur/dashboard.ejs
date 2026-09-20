@@ -88,39 +88,47 @@
                             <h6>Phoenix Motors</h6>
                         </div>
                     </div>
-                    <label class="form-label">Date de publication</label>
-                    <input type="date" class="form-control">
+                    <label class="form-label">Publiées depuis le</label>
+                    <input type="date" class="form-control" id="datePublicationMin">
 
-                    <label class="form-label mt-2">Nombre de candidatures</label>
-                    <input type="number" class="form-control" min="0">
+                    <label class="form-label mt-2">Candidatures minimum</label>
+                    <input type="number" class="form-control" id="candidaturesMin" min="0" placeholder="0">
 
                     <h6 class="mt-2">État de l'offre</h6>
                     <div>
-                        <input type="checkbox" id="actif"> <label for="actif">Actif</label><br>
-                        <input type="checkbox" id="expire"> <label for="expire">Expiré</label><br>
-                        <input type="checkbox" id="expire"> <label for="expire">Ouvert</label><br>
-                        <input type="checkbox" id="expire"> <label for="expire">Fermé</label>
+                        <input type="checkbox" id="etatOuverte" class="filtre-etat"> <label for="etatOuverte">Ouverte</label><br>
+                        <input type="checkbox" id="etatFermee" class="filtre-etat"> <label for="etatFermee">Fermée</label>
                     </div>
+
+                    <button id="btnAppliquerFiltres" type="button" class="btn btn-purple w-100 mt-3">Appliquer les filtres</button>
+                    <button id="btnReinitialiserFiltres" type="button" class="btn btn-outline-secondary w-100 mt-2">Réinitialiser</button>
                 </div>
             </div>
 
             <!-- Offres -->
             <div class="col-md-9">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <input type="text" class="form-control me-2" placeholder="Rechercher une offre...">
+                    <input type="text" class="form-control me-2" id="rechercheOffres" placeholder="Rechercher une offre...">
                     <a href="/recruteur/nouvelle-offre" class="btn btn-purple text-nowrap">+ Publier une offre</a>
                 </div>
 
+                <p id="aucunResultat" class="d-none">Aucune offre ne correspond à ces critères.</p>
+
                 <% if (offres && offres.length > 0) { %>
                     <% offres.forEach(o => { %>
-                        <div class="offer-card">
+                        <% const etatOuvert = (o.Etat || '').toLowerCase().includes('ouvert'); %>
+                        <div class="offer-card"
+                             data-indication="<%= (o.indication || '').toLowerCase() %>"
+                             data-date-publication="<%= o.date_publication ? new Date(o.date_publication).toISOString().slice(0, 10) : '' %>"
+                             data-candidatures="<%= o.nombre_candidatures || 0 %>"
+                             data-etat="<%= etatOuvert ? 'ouverte' : 'fermee' %>">
                             <div>
                                 <h6><%= o.indication %></h6>
-                                <p>Date de publication : <%= new Date(o.date_publication).toLocaleDateString('fr-FR') %> | 
+                                <p>Date de publication : <%= new Date(o.date_publication).toLocaleDateString('fr-FR') %> |
                                    Nombre de candidatures : <%= o.nombre_candidatures || 0 %></p>
                             </div>
                             <div class="text-end">
-                                <span class="<%= o.Etat === 'actif' ? 'status-actif' : 'status-expire' %>"><%= o.Etat %></span><br>
+                                <span class="<%= etatOuvert ? 'status-actif' : 'status-expire' %>"><%= o.Etat %></span><br>
                                 <a href="/recruteur/gestion-candidatures/<%= o.Id_offre %>" class="btn btn-outline-secondary mt-2">Voir Candidatures</a>
                             </div>
                         </div>
@@ -133,6 +141,50 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const rechercheInput = document.getElementById('rechercheOffres');
+        const datePublicationMin = document.getElementById('datePublicationMin');
+        const candidaturesMin = document.getElementById('candidaturesMin');
+        const casesEtat = Array.from(document.querySelectorAll('.filtre-etat'));
+        const btnAppliquer = document.getElementById('btnAppliquerFiltres');
+        const btnReinitialiser = document.getElementById('btnReinitialiserFiltres');
+        const cartes = Array.from(document.querySelectorAll('.offer-card'));
+        const aucunResultat = document.getElementById('aucunResultat');
+
+        function appliquerFiltres() {
+            const recherche = rechercheInput.value.trim().toLowerCase();
+            const dateMin = datePublicationMin.value;
+            const minCandidatures = candidaturesMin.value ? parseInt(candidaturesMin.value, 10) : null;
+            const etatsCoches = casesEtat.filter(c => c.checked).map(c => c.id === 'etatOuverte' ? 'ouverte' : 'fermee');
+
+            let visibles = 0;
+            cartes.forEach(carte => {
+                const correspondRecherche = !recherche || carte.dataset.indication.includes(recherche);
+                const correspondDate = !dateMin || (carte.dataset.datePublication && carte.dataset.datePublication >= dateMin);
+                const correspondCandidatures = minCandidatures === null || parseInt(carte.dataset.candidatures, 10) >= minCandidatures;
+                const correspondEtat = etatsCoches.length === 0 || etatsCoches.includes(carte.dataset.etat);
+
+                const visible = correspondRecherche && correspondDate && correspondCandidatures && correspondEtat;
+                carte.classList.toggle('d-none', !visible);
+                if (visible) visibles++;
+            });
+
+            aucunResultat.classList.toggle('d-none', visibles !== 0 || cartes.length === 0);
+        }
+
+        [rechercheInput, datePublicationMin, candidaturesMin].forEach(input => {
+            input.addEventListener('input', appliquerFiltres);
+        });
+        casesEtat.forEach(c => c.addEventListener('change', appliquerFiltres));
+        btnAppliquer.addEventListener('click', appliquerFiltres);
+        btnReinitialiser.addEventListener('click', () => {
+            rechercheInput.value = '';
+            datePublicationMin.value = '';
+            candidaturesMin.value = '';
+            casesEtat.forEach(c => c.checked = false);
+            appliquerFiltres();
+        });
+    </script>
 </body>
 </html>
 

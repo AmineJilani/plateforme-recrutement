@@ -105,7 +105,7 @@
             <!-- Section principale à droite -->
             <div class="col-md-9">
                 <!-- Recherche -->
-                <input type="text" class="form-control mb-3" placeholder="Rechercher">
+                <input type="text" class="form-control mb-3" id="rechercheAdmin" placeholder="Rechercher">
 
                 <!-- Section des utilisateurs -->
                 <div id="utilisateursSection" class="mt-4 d-none">
@@ -126,13 +126,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% utilisateurs.forEach(u => { %>
-                                    <tr>
+                                <% utilisateurs.forEach(u => {
+                                    const orga = organisations.find(o => o.Siren === u.organisation_id);
+                                    const orgaNom = orga ? orga.Nom : '';
+                                    const texteRecherche = [u.Nom, u.Prenom, u.email, u.role, orgaNom].join(' ').toLowerCase();
+                                %>
+                                    <tr data-recherche="<%= texteRecherche %>">
                                         <td><%= u.Nom %></td>
                                         <td><%= u.Prenom %></td>
                                         <td><%= u.email %></td>
                                         <td><%= u.role %></td>
-                                        <td><%= u.organisation_id %></td>
+                                        <td><%= orgaNom || '—' %></td>
                                         <td>
                                             <a href="/admin/utilisateurs/<%= u.Id %>/modifier" class="btn btn-sm btn-outline-secondary">Modifier</a>
                                             <form action="/admin/utilisateurs/<%= u.Id %>/supprimer" method="POST" class="d-inline" onsubmit="return confirm('Supprimer cet utilisateur ?');">
@@ -143,6 +147,7 @@
                                 <% }) %>
                             </tbody>
                         </table>
+                        <p id="aucunResultatUtilisateurs" class="d-none text-muted mb-0">Aucun utilisateur ne correspond à cette recherche.</p>
                     </div>
                 </div>
 
@@ -163,8 +168,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% organisations.forEach(o => { %>
-                                    <tr>
+                                <% organisations.forEach(o => {
+                                    const texteRecherche = [o.Nom, o.type, o.adresse_admini].join(' ').toLowerCase();
+                                %>
+                                    <tr data-recherche="<%= texteRecherche %>">
                                         <td><%= o.Nom %></td>
                                         <td><%= o.type %></td>
                                         <td><%= o.adresse_admini %></td>
@@ -178,6 +185,7 @@
                                 <% }) %>
                             </tbody>
                         </table>
+                        <p id="aucunResultatOrganisations" class="d-none text-muted mb-0">Aucune organisation ne correspond à cette recherche.</p>
                     </div>
                 </div>
             </div>
@@ -187,16 +195,48 @@
     <!-- Scripts Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Script pour gérer l'affichage des sections en fonction du bouton cliqué -->
+    <!-- Script pour gérer l'affichage des sections en fonction du bouton cliqué, et la recherche -->
     <script>
+        const rechercheInput = document.getElementById('rechercheAdmin');
+        const sectionUtilisateurs = document.getElementById('utilisateursSection');
+        const sectionOrganisations = document.getElementById('organisationsSection');
+        const aucunResultatUtilisateurs = document.getElementById('aucunResultatUtilisateurs');
+        const aucunResultatOrganisations = document.getElementById('aucunResultatOrganisations');
+
+        function sectionActive() {
+            return sectionUtilisateurs.classList.contains('d-none') ? sectionOrganisations : sectionUtilisateurs;
+        }
+
+        function appliquerRecherche() {
+            const recherche = rechercheInput.value.trim().toLowerCase();
+            const section = sectionActive();
+            const lignes = Array.from(section.querySelectorAll('tbody tr'));
+            const aucunResultat = section === sectionUtilisateurs ? aucunResultatUtilisateurs : aucunResultatOrganisations;
+
+            let visibles = 0;
+            lignes.forEach(ligne => {
+                const visible = !recherche || ligne.dataset.recherche.includes(recherche);
+                ligne.style.display = visible ? '' : 'none';
+                if (visible) visibles++;
+            });
+
+            aucunResultat.classList.toggle('d-none', visibles !== 0 || lignes.length === 0);
+        }
+
+        rechercheInput.addEventListener('input', appliquerRecherche);
+
         document.getElementById('btnUtilisateurs').addEventListener('click', function() {
-            document.getElementById('utilisateursSection').classList.remove('d-none');
-            document.getElementById('organisationsSection').classList.add('d-none');
+            sectionUtilisateurs.classList.remove('d-none');
+            sectionOrganisations.classList.add('d-none');
+            rechercheInput.value = '';
+            appliquerRecherche();
         });
 
         document.getElementById('btnOrganisations').addEventListener('click', function() {
-            document.getElementById('utilisateursSection').classList.add('d-none');
-            document.getElementById('organisationsSection').classList.remove('d-none');
+            sectionUtilisateurs.classList.add('d-none');
+            sectionOrganisations.classList.remove('d-none');
+            rechercheInput.value = '';
+            appliquerRecherche();
         });
     </script>
 </body>
